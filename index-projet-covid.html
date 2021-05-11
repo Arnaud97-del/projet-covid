@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset=utf-8>
+  <title>Gestion Covid</title>
+  <script src="js/tabs.js"></script> <!-- Script qui gère le changement de tab -->
+  <script src="js/villes.js"></script> <!-- Script à créer dans le dossier js !!! -->
+  <script src="js/personnes.js"></script> <!-- Script à créer dans le dossier js !!! --> 
+  <script src="js/resumes.js"></script> <!-- Script à créer dans le dossier js !!! --> 
+  <script src="js/visites.js"></script> <!-- Script à créer dans le dossier js !!! -->
+  <link rel=stylesheet href="css/gestion-covid.css">
+</head>
+
+<body class="bicolor">
+  <!--  onload="initialiserPage();" -->
+
+
+  <!-- Tab links -->
+  <div class="tab">
+    <!-- oncick pourrait être géré dans le javascript avec addeventListener -->
+    <button class="tablinks" id="tabAffichageResume" onclick="changerTab(this)">Résumé de la situation</button>
+    <button class="tablinks" id="tabVisitesVilles" onclick="changerTab(this)">Visites de villes</button>
+    <!-- <button class="tablinks" id="tabRecherchePersonnes" onclick="changerTab(this)">Rechercher des personnes</button> -->
+    <button class="tablinks" id="tabPersonnes" onclick="changerTab(this)">Administration personnes</button>
+    <button class="tablinks" id="tabVilles" onclick="changerTab(this)">Administration villes</button>
+  </div>
+
+  <!-- ---------- RESUME SITUATION ---------- -->
+  <section id="affichageResume" class="tabcontent">
+    <h2>Infos Covid</h2>
+
+    <h3>Nombre de cas actuellement</h3>
+    <div id="zoneNombreMalade" class="affichage">
+      <p class="texte">Nombre de personnes actuellement malades :
+        <strong><span id="nombreMalades">En cours...</span></strong><br>
+        <em>(testées positif avec la date d'expiration du test après ou égale à la date du jour)</em>
+      </p>
+    </div>
+
+    <h3>Nombre de tests récents</h3>
+    <div id="zoneNombreTests" class="affichage">
+      <p class="texte">Nombre de personnes testées :
+        <strong><span id="nombreTests">En cours...</span></strong><br>
+        <em>(testées avec la date d'expiration du test après ou égale à la date du jour)</em>
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ---------- VISITE DE VILLE ---------- -->
+
+  <section id="visitesVilles" class="tabcontent">
+
+    <div id="encodageVisiteVille" class="formulaire">
+      <h2>Encodage des visites de villes</h2>
+      <form id="formAjoutTestCovide" action=# onsubmit='return ajouterVisiteVille(this);'>
+        <fieldset>
+          <legend>Enregistrer visite ville</legend>
+          <!-- Personne -->
+          <label for="personneVisiteVille">Personne * : </label>
+          <select id="personneVisiteVille" name="personneVisiteVille" required>
+          </select>
+          <br>
+          <!-- Ville Visitée -->
+          <label for="villeVisitee">Ville visitée * : </label>
+          <select id="villeVisitee" name="villeVisitee" required> 
+          </select>
+          <br>
+          <!-- date de visite -->
+          <label for="dateVisite">Date de visite * : </label>
+          <input type="date" id="dateVisite" name="dateVisite" required>
+          <br>
+          <!-- bouton validation -->
+          <input type="submit" id="boutonEnregistrerVisiteVille" value="Enregistrer la visite de ville">
+        </fieldset>
+      </form>
+
+    </div>
+
+     
+    
+    <div id="affichageMaladesParVille">
+      <h2>Nombre de malades par ville</h3>
+      <p>Par ville,<br>
+         afficher le nombre de malades (testés positifs avec la date d'expiration du test après la date du jour)<br>
+         ayant visité la ville (date de visite dans le passé par rapport à la date du jour),<br>
+         lorsqu'il y en a plus de 1 cas.</p>
+      <div id="zoneTableNombreMaladesParVille" class="affichage">
+        <table>
+          <thead>
+            <tr>
+              <th id="personneFiltreeTitreId">Code Postal</th>
+              <th id="personneFiltreeTitrePrenom">Nom Ville</th>
+              <th id="personneFiltreeTitreNom">Nombre cas positifs</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyNombreMaladesParVille">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ---------- RECHERCHE PERSONNES ---------- -->
+  <section id="recherchePersonnes" class="tabcontent">
+    <div id="zonePersonnesSelonCriteres">
+      <h2>Lister les personnes sur base de filtres</h2>
+      <form id="RechercherPersonnes" class="formulaire" action=# onsubmit='return rechercherPersonnesFiltrees(this);'>
+        <fieldset>
+          <legend>Critères</legend>
+          <!--<legend>Choisir les filtres à utiliser avant de lancer la recherche</legend> -->
+          <!-- Ville -->
+          <label for="filtreVille">Ville visitée dans les 7 jours précédents * : </label>
+          <select id="filtreVille" name="filtreVille">
+          </select>
+          <br>
+
+          <!-- Age -->
+          <label for="filtreAge">Age minimal : </label>
+          <input type="number" id="filtreAge" name="filtreAge" min="0" max="125" step="1" placeholder="Age minimal..."
+            required>
+          <br>
+          <!-- Résultat Covid -->
+          <label for="filtreCovid">Positif ou Négatif :</label>
+          <select id="filtreCovid" name="filtreCovid" required>
+            <option value="P">Positif</option>
+            <option value="N">Negatif</option>
+          </select>
+          <br>
+          <input type="submit" id="boutonRechercherPersonnes" value="Rechercher Personnes sur base des critères">
+        </fieldset>
+      </form>
+      <div>
+
+        <div id="zoneTablePersonnesfiltrees" class="affichage">
+          <table>
+            <thead>
+              <tr>
+                <th id="personneFiltreeTitreId">id</th>
+                <th id="personneFiltreeTitrePrenom">Prénom</th>
+                <th id="personneFiltreeTitreNom">Nom</th>
+                <th id="personneFiltreeTitreNaissance">Date Naissance</th>
+                <th id="personneFiltreeTitrePositifCovid">Positif Covid ?</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPersonnesFiltrees">
+            </tbody>
+          </table>
+        </div>
+
+  </section>
+
+
+  <!-- ---------- ADMINISTRATION PERSONNES ---------- -->
+  <section id="personnes" class="tabcontent">
+
+    <h2>Personnes</h2>
+
+    <div id="ajoutPersonne" class="formulaire">
+      <form id="formAjoutPersonne" action=# onsubmit='return ajouterPersonne(this);'>
+        <fieldset>
+          <legend>Ajouter une personne</legend>
+          <!-- Prénom -->
+          <label for="prenomPersonne">Prenom * : </label>
+          <input type="text" id="prenomPersonne" name="prenom" minlength="1" maxlength="40"
+            placeholder="Prénom de la personne..." required>
+          <br>
+          <!-- Nom -->
+          <label for="nomPersonne">Nom * : </label>
+          <input type="text" id="nomPersonne" name="nom" minlength="1" maxlength="40"
+            placeholder="Nom de la personne..." required>
+          <br>
+          <!-- date de naissance -->
+          <label for="dateNaissance">Date de naissance * : </label>
+          <input type="date" id="dateNaissance" name="naissance" required>
+          <br>
+          <!-- Sexe -->
+          <label for="sexePersonne">Sexe * : </label>
+          <select id="sexePersonne" name="sexe">
+            <option value="F" selected>Féminin</option>
+            <option value="M">Masculin</option>
+            <option value="N">Indéfini</option>
+          </select>
+          <br>
+          <!-- bouton validation -->
+          <input type="submit" id="boutonCreationPersonne" value="Enregistrer personne">
+        </fieldset>
+      </form>
+    </div>
+
+    <div id="testsCovid" class="formulaire">
+      <form id="formAjoutTestCovide" action=# onsubmit='return ajouterTestCovid(this);'>
+        <fieldset>
+          <legend>Enregistrer test Covid</legend>
+          <!-- Personne -->
+          <label for="personneTestCovid">Personne * : </label>
+          <select id="personneTestCovid" name="personneTestCovid" required>
+          </select>
+          <br>
+          <!-- Résultat Covid -->
+          <label for="resultatTestCovid">Résultat * : </label>
+          <select id="resultatTestCovid" name="resultatTestCovid" required>
+            <option value="1">Positif</option>
+            <option value="0">Negatif</option>
+          </select>
+          <br>
+          <!-- date de test covid -->
+          <label for="dateTestCovid">Date du test Covid * : </label>
+          <input type="date" id="dateTestCovid" name="dateTestCovid" required>
+          <br>
+          <!-- date d'expiration du test covid -->
+          <label for="dateExpirationTestCovid">Date d'expiration du test Covid * : </label>
+          <input type="date" id="dateExpirationTestCovid" name="dateExpirationTestCovid" required>
+          <br>
+          <!-- bouton validation -->
+          <input type="submit" id="boutonEnregistrerTestCovid" value="Enregistrer Test Covid">
+        </fieldset>
+      </form>
+
+    </div>
+
+    <div id="zoneTablePersonnes" class="affichage">
+      <!-- <p>Table des Personnes :</p> -->
+      <table>
+        <thead>
+          <tr>
+            <th id="personneTitreId">id</th>
+            <th id="personneTitrePrenom">Prénom</th>
+            <th id="personneTitreNom">Nom</th>
+            <th id="personneTitreNaissance">Date Naissance</th>
+            <th id="personneTitrePositifCovid"
+              title="Si le résultat du test est positif et la date d'expiration est dans le futur.">Positif Covid ?
+              (&#8505;)</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyPersonnes">
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+
+
+  <!-- ---------- ADMINISTRATION VILLES ---------- -->
+
+  <section id="villes" class="tabcontent">
+    <h2>Villes</h2>
+
+    <div id="ajoutville" class="formulaire">
+      <form id="formAjoutVille" action=# onsubmit='return ajouterVille(this);'>
+        <fieldset>
+          <legend>Ajouter une ville</legend>
+          <!-- Nom -->
+          <label for="nomVille">Ville * : </label>
+          <input type="text" id="nomVille" name="ville" minlength="1" maxlength="40" placeholder="Nom de la ville..."
+            required >
+          <br>
+          <!-- code postal -->
+          <label for="codePostal">Code postal * : </label>
+          <input type="number" id="codePostal" name="codePostal" min="1000" max="9999" step="1" placeholder="CP..."
+            required >
+          <br>
+          <!-- bouton validation -->
+          <input type="submit" id="boutonCreationVille" value="Enregistrer Ville">
+        </fieldset>
+      </form>
+    </div>
+
+    <div id="zoneListeVille" class="affichage">
+      <h3>Liste des villes du système :</h3>
+      <!-- <p>Table des Personnes :</p> -->
+      <ul id="listeVilles">
+        <!-- 1410 Waterloo -->
+      </ul>
+    </div>
+
+
+  </section>
+
+  <hr>
+  <footer>
+    <p>Fin de la page, bonne programmation !</p>
+  </footer>
+</body>
+
+</html>
